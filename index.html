@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Equivalent Exchange</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -501,12 +502,28 @@ h2 span.full { color: var(--blood); }
   .readout { grid-template-columns: minmax(0, 1fr); }
   .ledger { text-align: left; }
 }
+/* Fit mode (embedded in a frame such as Newgrounds, or ?fit=1): the page never scrolls; each column scrolls on its own and the circle shrinks to the frame height. */
+@media (min-width: 1021px) {
+  html.fit, html.fit body { height: 100%; overflow: hidden; }
+  html.fit body { display: flex; flex-direction: column; }
+  html.fit header { width: 100%; padding-block: 10px 2px; flex-wrap: nowrap; align-items: center; }
+  html.fit h1 { font-size: 30px; white-space: nowrap; }
+  html.fit .steps { display: none; }
+  html.fit .app { flex: 1; min-height: 0; width: 100%; padding-block: 8px 12px; gap: 20px; align-items: stretch; grid-template-columns: minmax(0, 300px) minmax(0, 1fr) minmax(0, 310px); }
+  html.fit .col, html.fit .stage { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--chalk-faint) transparent; }
+  html.fit .stage { gap: 10px; }
+  html.fit .circle-wrap { width: min(100%, 580px, max(240px, 100vh - 370px)); flex-shrink: 0; }
+  html.fit .circle-wrap { container-type: inline-size; }
+  html.fit .slot { font-size: clamp(9px, 3.1cqi, 15px); }
+  html.fit .codex, html.fit .log { max-height: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .gslot.landed, .circle-wrap.shake, .chip.fresh, .recipe.new *, .encounter, .coach-ring, .slot.landed, .circle-wrap.armed .slot { animation: none !important; }
   .coach-ring { transition: none; }
 }
 </style>
 
+<script>if (self !== top || /[?&]fit=1/.test(location.search)) document.documentElement.classList.add('fit');</script>
 <header>
   <div class="title-block"><h1>Equivalent Exchange</h1><div class="chapter" id="chapter"></div></div>
   <div class="head-right">
@@ -5002,7 +5019,7 @@ function placeCoach() {
 
 $('coachNext').onclick = () => { tutGo(S.tut + 1); render(); };
 $('coachSkip').onclick = () => { S.tut = null; S.seenIntro = true; render(); };
-addEventListener('scroll', placeCoach, { passive: true });
+addEventListener('scroll', placeCoach, { passive: true, capture: true });
 addEventListener('resize', placeCoach);
 
 // ---------- Boot ----------
