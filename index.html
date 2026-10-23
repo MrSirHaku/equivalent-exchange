@@ -510,7 +510,19 @@ h2 span.full { color: var(--blood); }
   html.fit h1 { font-size: 30px; white-space: nowrap; }
   html.fit .steps { display: none; }
   html.fit .app { flex: 1; min-height: 0; width: 100%; padding-block: 8px 12px; gap: 20px; align-items: stretch; grid-template-columns: minmax(0, 300px) minmax(0, 1fr) minmax(0, 310px); }
-  html.fit .col, html.fit .stage { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--chalk-faint) transparent; }
+  html.fit body { font-size: 16px; }
+  html.fit .col { gap: 14px; }
+  html.fit h2 { margin-bottom: 8px; }
+  html.fit .col, html.fit .stage { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; scrollbar-width: thin; scrollbar-color: rgba(207, 166, 92, 0.6) rgba(235, 231, 219, 0.05); }
+  /* A sticky tab at the bottom of any column with hidden content; its negative margin cancels its own height and the column gap, so showing it never changes the scroll height. */
+  .more-hint {
+    position: sticky; bottom: 0; z-index: 3; align-self: stretch; height: 30px; margin-top: -44px; flex-shrink: 0;
+    border: 0; padding: 0 0 3px; background: linear-gradient(rgba(27, 32, 36, 0), var(--slate) 65%);
+    color: var(--brass); font-family: var(--display); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .stage > .more-hint { margin-top: -40px; }
+  .more-hint:hover { color: var(--chalk); }
   html.fit .stage { gap: 10px; }
   html.fit .circle-wrap { width: min(100%, 580px, max(240px, 100vh - 370px)); flex-shrink: 0; }
   html.fit .circle-wrap { container-type: inline-size; }
@@ -5021,6 +5033,20 @@ $('coachNext').onclick = () => { tutGo(S.tut + 1); render(); };
 $('coachSkip').onclick = () => { S.tut = null; S.seenIntro = true; render(); };
 addEventListener('scroll', placeCoach, { passive: true, capture: true });
 addEventListener('resize', placeCoach);
+
+// Fit mode: columns scroll inside the frame, so each one gets a "more below" tab while it has hidden content.
+if (document.documentElement.classList.contains('fit')) {
+  document.querySelectorAll('.app > section').forEach(col => {
+    const hint = document.createElement('button');
+    hint.type = 'button'; hint.className = 'more-hint'; hint.textContent = '▾ More below'; hint.hidden = true;
+    hint.onclick = () => col.scrollBy({ top: col.clientHeight * 0.7, behavior: reduce ? 'auto' : 'smooth' });
+    col.append(hint);
+    const check = () => { hint.hidden = col.scrollTop + col.clientHeight >= col.scrollHeight - 8; };
+    col.addEventListener('scroll', check, { passive: true });
+    const ro = new ResizeObserver(check);
+    ro.observe(col); [...col.children].forEach(c => c !== hint && ro.observe(c));
+  });
+}
 
 // ---------- Boot ----------
 function start(data) {
